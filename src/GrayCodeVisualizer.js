@@ -9,7 +9,7 @@ const GrayCodeVisualizer = () => {
   const [activeTab, setActiveTab] = useState('visualization');
 
   /* Generate Gray code sequence */
-  const generateGrayCode = (n) => {
+  const generateGrayCode = React.useCallback((n) => {
     const result = [];
     const total = Math.pow(2, n);
     for (let i = 0; i < total; i++) {
@@ -17,18 +17,21 @@ const GrayCodeVisualizer = () => {
       result.push(gray.toString(2).padStart(n, '0'));
     }
     return result;
-  };
+  }, []);
 
-  const graySequence = generateGrayCode(bits);
+  const graySequence = React.useMemo(() => generateGrayCode(bits), [bits, generateGrayCode]);
 
   /* Auto-play functionality */
   useEffect(() => {
+    let timer;
     if (isPlaying) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         setCurrentIndex((prev) => (prev + 1) % graySequence.length);
       }, speed);
-      return () => clearTimeout(timer);
     }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [isPlaying, currentIndex, speed, graySequence.length]);
 
   /* Highlight changed bit */
@@ -230,7 +233,7 @@ def generate_gray_code(bits):
                   Key Property
                 </h4>
                 <p className="text-gray-700">
-                  The XOR operation (n ^ (n &gt;&gt; 1)) converts binary to Gray code by XORing each bit
+                  The XOR operation (n ^ (n >> 1)) converts binary to Gray code by XORing each bit
                   with the bit to its left. This ensures adjacent values differ by only one bit.
                 </p>
               </div>
